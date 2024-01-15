@@ -46,7 +46,7 @@
     "humanmade/s3-uploads": "3.0.*",
     "wpackagist-plugin/mailgun": "2.1.2",
     "wpackagist-theme/twentytwentytwo":"^1.2",
-    "wpackagist-plugin/jetpack":"12.*",
+    "wpackagist-plugin/jetpack":"13.*",
     "wpackagist-plugin/jetpack-boost":"2.2.*",
     "wpackagist-plugin/akismet":"5.*",
     "wpackagist-theme/twentytwentythree":"1.1",
