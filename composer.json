@@ -47,7 +47,7 @@
     "wpackagist-plugin/mailgun": "2.1.2",
     "wpackagist-theme/twentytwentytwo":"^1.2",
     "wpackagist-plugin/jetpack":"13.*",
-    "wpackagist-plugin/jetpack-boost":"2.2.*",
+    "wpackagist-plugin/jetpack-boost":"3.0.*",
     "wpackagist-plugin/akismet":"5.*",
     "wpackagist-theme/twentytwentythree":"1.1",
     "wpackagist-plugin/traffic":"2.9.*"
