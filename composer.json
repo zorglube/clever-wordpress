@@ -42,7 +42,7 @@
     "roots/wordpress": "6.4.*",
     "roots/wp-config": "1.0.0",
     "roots/wp-password-bcrypt": "1.1.0",
-    "wp-cli/wp-cli-bundle": "2.9.*",
+    "wp-cli/wp-cli-bundle": "2.10.*",
     "humanmade/s3-uploads": "3.0.*",
     "wpackagist-theme/twentytwentytwo":"^1.2",
     "wpackagist-plugin/jetpack":"13.*",
