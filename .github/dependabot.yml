@@ -14,12 +14,6 @@ updates:
     # Check for updates once a week
     schedule:
       interval: "weekly"
-<<<<<<< HEAD
     # Add assignees
     assignees:
       - "zorglube"
-=======
-     # Add assignees
-    assignees:
-      - "juliamrch"
->>>>>>> main-upstream
