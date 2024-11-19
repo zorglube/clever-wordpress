@@ -45,7 +45,7 @@
     "wp-cli/wp-cli-bundle": "2.11.*",
     "humanmade/s3-uploads": "3.0.*",
     "wpackagist-theme/twentytwentytwo":"^1.2",
-    "wpackagist-plugin/jetpack":"13.*",
+    "wpackagist-plugin/jetpack":"14.*",
     "wpackagist-plugin/jetpack-boost":"3.5.*",
     "wpackagist-plugin/akismet":"5.*",
     "wpackagist-theme/twentytwentythree":"1.6",
