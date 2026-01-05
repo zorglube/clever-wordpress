@@ -50,7 +50,8 @@
     "wpackagist-plugin/akismet":"5.*",
     "wpackagist-theme/twentytwentythree":"1.6",
     "wpackagist-plugin/visitors-traffic-real-time-statistics":"8.3",
-    "wpackagist-plugin/crowdsec":"2.13.0"
+    "wpackagist-plugin/crowdsec":"2.13.0",
+    "wpackagist-plugin/wp-piwik":"1.0.31"
   },
   "require-dev": {
     "squizlabs/php_codesniffer": "^4.0.0",
