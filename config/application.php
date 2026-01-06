@@ -136,3 +136,10 @@ Config::apply();
 if (!defined('ABSPATH')) {
     define('ABSPATH', $webroot_dir . '/wp/');
 }
+
+/**
+ * Bootstrap Piwik
+ */
+if (!defined('wpRootDir')) {
+    define('wpRootDir', $webroot_dir . '/wp/');
+}
