@@ -49,7 +49,7 @@
     "wpackagist-plugin/jetpack-boost":"4.5.*",
     "wpackagist-plugin/akismet":"5.*",
     "wpackagist-theme/twentytwentythree":"1.6",
-    "wpackagist-plugin/visitors-traffic-real-time-statistics":"8.3",
+    "wpackagist-plugin/visitors-traffic-real-time-statistics":"8.4",
     "wpackagist-plugin/crowdsec":"2.13.1"
   },
   "require-dev": {
