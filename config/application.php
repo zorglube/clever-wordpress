@@ -21,7 +21,6 @@ $webroot_dir = $root_dir . '/web';
  * Expose global env() function from oscarotero/env
  */
 
-
 /**
  * Use Dotenv to set required environment variables and load .env file in root
  */
@@ -39,6 +38,7 @@ if (file_exists($root_dir . '/.env')) {
  * Default: production
  */
 define('WP_ENV', env('WP_ENV') ?: 'production');
+define( 'WP_CACHE', true );
 
 /**
  * URLs
