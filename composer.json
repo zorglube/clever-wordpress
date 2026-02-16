@@ -51,7 +51,7 @@
     "wpackagist-theme/twentytwentythree":"1.6",
     "wpackagist-plugin/visitors-traffic-real-time-statistics":"8.4",
     "wpackagist-plugin/crowdsec":"2.13.1",
-    "wpackagist-plugin/wp-piwik":"1.0.30",
+    "wpackagist-plugin/wp-piwik":"1.0.31",
     "wpackagist-plugin/wp-statistics":"14.16.1"
   },
   "require-dev": {
