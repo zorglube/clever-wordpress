@@ -52,7 +52,7 @@
     "wpackagist-plugin/visitors-traffic-real-time-statistics":"8.5",
     "wpackagist-plugin/crowdsec":"2.13.1",
     "wpackagist-plugin/wp-piwik":"1.0.31",
-    "wpackagist-plugin/wp-statistics":"14.16.1"
+    "wpackagist-plugin/wp-statistics":"14.16.2"
   },
   "require-dev": {
     "squizlabs/php_codesniffer": "^4.0.0",
