@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Your base production configuration goes in this file. Environment-specific
  * overrides go in their respective config/environments/{{WP_ENV}}.php file.
@@ -9,25 +10,49 @@
  */
 
 use Roots\WPConfig\Config;
+
 use function Env\env;
 
-/** @var string Directory containing all of the site's files */
+// CONVERT_* + STRIP_QUOTES + LOCAL_FIRST
+Env\Env::$options
+    = Env\Env::CONVERT_BOOL
+    | Env\Env::CONVERT_NULL
+    | Env\Env::CONVERT_INT
+    | Env\Env::STRIP_QUOTES
+    | Env\Env::LOCAL_FIRST;
+
+/**
+ * Directory containing all of the site's files
+ *
+ * @var string
+ */
 $root_dir = dirname(__DIR__);
 
-/** @var string Document Root */
+/**
+ * Document Root
+ *
+ * @var non-falsy-string
+ */
 $webroot_dir = $root_dir . '/web';
 
 /**
- * Expose global env() function from oscarotero/env
- */
-
-
-/**
  * Use Dotenv to set required environment variables and load .env file in root
+ * .env.local will override .env if it exists
  */
-$dotenv = Dotenv\Dotenv::createImmutable($root_dir);
 if (file_exists($root_dir . '/.env')) {
+    $env_files = file_exists($root_dir . '/.env.local')
+        ? ['.env', '.env.local']
+        : ['.env'];
+
+    $repository = Dotenv\Repository\RepositoryBuilder::createWithNoAdapters()
+        ->addAdapter(Dotenv\Repository\Adapter\EnvConstAdapter::class)
+        ->addAdapter(Dotenv\Repository\Adapter\PutenvAdapter::class)
+        ->immutable()
+        ->make();
+
+    $dotenv = Dotenv\Dotenv::create($repository, $root_dir, $env_files, false);
     $dotenv->load();
+
     $dotenv->required(['WP_HOME', 'WP_SITEURL']);
     if (!env('DATABASE_URL')) {
         $dotenv->required(['DB_NAME', 'DB_USER', 'DB_PASSWORD']);
@@ -39,6 +64,30 @@ if (file_exists($root_dir . '/.env')) {
  * Default: production
  */
 define('WP_ENV', env('WP_ENV') ?: 'production');
+
+/**
+ * Set WP_ENVIRONMENT_TYPE if not already defined
+ */
+if (!defined('WP_ENVIRONMENT_TYPE')) {
+    $wp_environment_type = env('WP_ENVIRONMENT_TYPE');
+
+    if ($wp_environment_type) {
+        Config::define('WP_ENVIRONMENT_TYPE', $wp_environment_type);
+    } elseif (in_array(WP_ENV, ['production', 'staging', 'development', 'local'], true)) {
+        Config::define('WP_ENVIRONMENT_TYPE', WP_ENV);
+    }
+}
+
+/**
+ * Set WP_DEVELOPMENT_MODE if explicitly configured
+ */
+if (!defined('WP_DEVELOPMENT_MODE')) {
+    $wp_development_mode = env('WP_DEVELOPMENT_MODE');
+
+    if ($wp_development_mode) {
+        Config::define('WP_DEVELOPMENT_MODE', $wp_development_mode);
+    }
+}
 
 /**
  * URLs
@@ -55,11 +104,18 @@ Config::define('WP_CONTENT_URL', Config::get('WP_HOME') . Config::get('CONTENT_D
 
 /**
  * DB settings
+ *
+ * On Clever Cloud, database credentials are provided via MYSQL_ADDON_* environment variables.
+ * These are mapped here instead of the default DB_* variables.
  */
-Config::define('DB_NAME', env('MYSQL_ADDON_DB'));
-Config::define('DB_USER', env('MYSQL_ADDON_USER'));
-Config::define('DB_PASSWORD', env('MYSQL_ADDON_PASSWORD'));
-Config::define('DB_HOST', env('MYSQL_ADDON_HOST') . ":" . env('MYSQL_ADDON_PORT'));
+if (env('DB_SSL')) {
+    Config::define('MYSQL_CLIENT_FLAGS', MYSQLI_CLIENT_SSL);
+}
+
+Config::define('DB_NAME', env('MYSQL_ADDON_DB') ?: env('DB_NAME'));
+Config::define('DB_USER', env('MYSQL_ADDON_USER') ?: env('DB_USER'));
+Config::define('DB_PASSWORD', env('MYSQL_ADDON_PASSWORD') ?: env('DB_PASSWORD'));
+Config::define('DB_HOST', env('MYSQL_ADDON_HOST') ? env('MYSQL_ADDON_HOST') . ':' . env('MYSQL_ADDON_PORT') : (env('DB_HOST') ?: 'localhost'));
 Config::define('DB_CHARSET', 'utf8mb4');
 Config::define('DB_COLLATE', '');
 $table_prefix = env('DB_PREFIX') ?: 'wp_';
@@ -90,25 +146,36 @@ Config::define('NONCE_SALT', env('NONCE_SALT'));
  */
 Config::define('AUTOMATIC_UPDATER_DISABLED', true);
 Config::define('DISABLE_WP_CRON', env('DISABLE_WP_CRON') ?: false);
+
 // Disable the plugin and theme file editor in the admin
 Config::define('DISALLOW_FILE_EDIT', true);
+
 // Disable plugin and theme updates and installation from the admin
 Config::define('DISALLOW_FILE_MODS', true);
 
+// Limit the number of post revisions
+Config::define('WP_POST_REVISIONS', env('WP_POST_REVISIONS') ?? true);
+
+// Disable script concatenation
+Config::define('CONCATENATE_SCRIPTS', false);
+
 /**
- * S3 Uploads Settings
+ * S3 Uploads Settings (Cellar S3 storage on Clever Cloud)
  */
-define('S3_UPLOADS_BUCKET', env('CELLAR_ADDON_BUCKET'));
-define('S3_UPLOADS_KEY', env('CELLAR_ADDON_KEY_ID'));
-define('S3_UPLOADS_SECRET', env('CELLAR_ADDON_KEY_SECRET'));
-define('S3_UPLOADS_REGION', 'Cellar');
-define('S3_UPLOADS_BUCKET_URL', 'https://' . env('CELLAR_ADDON_BUCKET') . '.' . env('CELLAR_ADDON_HOST'));
-define('S3_UPLOADS_ENDPOINT', 'https://' . env('CELLAR_ADDON_HOST'));
+if (env('CELLAR_ADDON_BUCKET')) {
+    define('S3_UPLOADS_BUCKET', env('CELLAR_ADDON_BUCKET'));
+    define('S3_UPLOADS_KEY', env('CELLAR_ADDON_KEY_ID'));
+    define('S3_UPLOADS_SECRET', env('CELLAR_ADDON_KEY_SECRET'));
+    define('S3_UPLOADS_REGION', 'Cellar');
+    define('S3_UPLOADS_BUCKET_URL', 'https://' . env('CELLAR_ADDON_BUCKET') . '.' . env('CELLAR_ADDON_HOST'));
+    define('S3_UPLOADS_ENDPOINT', 'https://' . env('CELLAR_ADDON_HOST'));
+}
 
 /**
  * Debugging Settings
  */
 Config::define('WP_DEBUG_DISPLAY', false);
+Config::define('WP_DEBUG_LOG', false);
 Config::define('SCRIPT_DEBUG', false);
 ini_set('display_errors', '0');
 
