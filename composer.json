@@ -2,7 +2,7 @@
   "name": "roots/bedrock",
   "type": "project",
   "license": "MIT",
-  "description": "WordPress boilerplate with modern development tools, easier configuration, and an improved folder structure",
+  "description": "WordPress boilerplate with Composer, easier configuration, and an improved folder structure",
   "homepage": "https://roots.io/bedrock/",
   "authors": [
     {
@@ -22,7 +22,7 @@
     }
   ],
   "keywords": [
-    "bedrock", "composer", "roots", "wordpress", "wp", "wp-config"
+    "bedrock", "composer", "roots", "wordpress-composer", "wordpress", "wp-composer", "wp-config", "wp"
   ],
   "support": {
     "issues": "https://github.com/roots/bedrock/issues",
@@ -30,12 +30,21 @@
   },
   "repositories": [
     {
+      "name": "wp-composer",
+      "type": "composer",
+      "url": "https://repo.wp-composer.com",
+      "only": [
+        "wp-plugin/*",
+        "wp-theme/*"
+      ]
+    },
+    {
       "type": "composer",
       "url": "https://wpackagist.org"
     }
   ],
   "require": {
-    "php": ">=7.1",
+    "php": ">=8.3",
     "composer/installers": "^2.2",
     "vlucas/phpdotenv": "^5.6.0",
     "oscarotero/env": "^2.1.0",
@@ -51,37 +60,42 @@
     "wpackagist-plugin/visitors-traffic-real-time-statistics":"8.6",
     "wpackagist-plugin/crowdsec":"2.13.1",
     "wpackagist-plugin/wp-piwik":"1.1.2",
-    "wpackagist-plugin/wp-statistics":"14.16.4"
+    "wpackagist-plugin/wp-statistics":"14.16.4",
+    "wp-theme/twentytwentyfive": "^1.0"
   },
   "require-dev": {
-    "squizlabs/php_codesniffer": "^4.0.0",
-    "roave/security-advisories": "dev-master"
+    "laravel/pint": "^1.27",
+    "pestphp/pest": "^4.0"
   },
   "config": {
     "optimize-autoloader": true,
     "preferred-install": "dist",
-    "sort-packages": true,
     "allow-plugins": {
-    "composer/installers":true,
-    "roots/wordpress-core-installer":true
-    }
+      "composer/installers": true,
+      "roots/wordpress-core-installer": true,
+      "pestphp/pest-plugin": true
+    },
+    "sort-packages": true
   },
   "minimum-stability": "dev",
   "prefer-stable": true,
   "extra": {
     "installer-paths": {
-      "web/app/mu-plugins/{$name}/": ["type:wordpress-muplugin"],
-      "web/app/plugins/{$name}/": ["type:wordpress-plugin"],
-      "web/app/themes/{$name}/": ["type:wordpress-theme"]
+      "web/app/mu-plugins/{$name}/": [
+        "type:wordpress-muplugin"
+      ],
+      "web/app/plugins/{$name}/": [
+        "type:wordpress-plugin"
+      ],
+      "web/app/themes/{$name}/": [
+        "type:wordpress-theme"
+      ]
     },
     "wordpress-install-dir": "web/wp"
   },
   "scripts": {
-    "post-root-package-install": [
-        "php -r \"copy('.env.example', '.env');\""
-    ],
-    "test": [
-      "phpcs"
-    ]
+    "lint": "pint --test",
+    "lint:fix": "pint",
+    "test": "pest"
   }
 }
