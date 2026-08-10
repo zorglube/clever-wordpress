@@ -33,3 +33,5 @@ phpunit.xml
 wp-cli.local.yml
 
 .clever.json
+vendor/
+composer.lock

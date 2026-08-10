@@ -64,6 +64,7 @@ if (file_exists($root_dir . '/.env')) {
  * Default: production
  */
 define('WP_ENV', env('WP_ENV') ?: 'production');
+define( 'WP_CACHE', true );
 
 /**
  * Set WP_ENVIRONMENT_TYPE if not already defined
@@ -177,6 +178,7 @@ if (env('CELLAR_ADDON_BUCKET')) {
 Config::define('WP_DEBUG_DISPLAY', false);
 Config::define('WP_DEBUG_LOG', false);
 Config::define('SCRIPT_DEBUG', false);
+Config::define('WP_DEBUG', env('WP_DEBUG') ?: false);
 ini_set('display_errors', '0');
 
 /**
