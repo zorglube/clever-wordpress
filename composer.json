@@ -52,7 +52,8 @@
     "wpackagist-plugin/crowdsec":"2.13.1",
     "wpackagist-plugin/wp-piwik":"1.1.10",
     "wpackagist-plugin/wp-statistics":"14.16.10",
-    "wpackagist-plugin/wp-dark-mode":"5.3.10"
+    "wpackagist-plugin/wp-dark-mode":"5.3.10",
+    "wpackagist-plugin/webspellchecker":"3.2.2"
   },
   "require-dev": {
     "squizlabs/php_codesniffer": "^4.0.0",
