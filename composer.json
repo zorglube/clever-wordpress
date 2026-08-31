@@ -47,7 +47,7 @@
     "wpackagist-plugin/jetpack":"16.*",
     "wpackagist-plugin/jetpack-boost":"4.7.*",
     "wpackagist-plugin/akismet":"5.*",
-    "wpackagist-theme/twentytwentythree":"1.6",
+    "wpackagist-theme/twentytwentythree":"1.7",
     "wpackagist-plugin/visitors-traffic-real-time-statistics":"8.12",
     "wpackagist-plugin/crowdsec":"2.13.1",
     "wpackagist-plugin/wp-piwik":"1.1.10",
