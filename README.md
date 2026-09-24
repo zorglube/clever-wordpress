@@ -1,85 +1,236 @@
-# Deploy WordPress on CleverCloud, the immutable way
+# WordPress (Bedrock) Example Application on Clever Cloud
 
-## What is this?
+[![Clever Cloud - PaaS](https://img.shields.io/badge/Clever%20Cloud-PaaS-orange)](https://clever-cloud.com)
 
-[Bedrock](https://roots.io/bedrock/) ([GitHub Project](https://github.com/roots/bedrock)) is a modern WordPress stack that allows to maintain your installation clean from any code change during runtime. [CleverCloud](https://www.clever-cloud.com/) is a rock solid IT automation platform.
+This is a WordPress application using [Bedrock](https://roots.io/bedrock/) ([GitHub](https://github.com/roots/bedrock)), a modern WordPress stack that keeps your installation clean from runtime code changes. It is pre-configured to deploy on [Clever Cloud](https://www.clever-cloud.com/) with MySQL and Cellar S3 storage.
 
-Now you can take advantages of both to have your [WordPress](https://wordpress.org) installed on it. While you can follow basic steps to install BedRock yourself on CleverCloud, here is a nice shortcut that you can just fork and deploy.
+## About the Application
 
-## How it works?
+This project is based on Bedrock 1.30.0 with the following Clever Cloud-specific modifications:
 
-Composer is a PHP dependency manager that allows you to manage your Wordpress install and plugins with improved dependency management and more reliable development than vanilla Wordpress. It's similar to putting Worpdress in its own subdirectory, but with easier configuration. Isolated web root enhances security by limiting access to non-web files, while vanilla WordPress structure the whole configuration on the same root.
+- `config/application.php` — maps Clever Cloud's `MYSQL_ADDON_*` and `CELLAR_ADDON_*` environment variables
+- `composer.json` — includes `humanmade/s3-uploads` for S3 media storage and `wpackagist-plugin/mailgun` for email delivery
+- `web/app/mu-plugins/s3-uploads-filter.php` — configures a Cellar endpoint instead of AWS
+- `web/.htaccess` — included and tracked (Bedrock gitignores it by default)
+- `clevercloud/php.json` — sets the webroot to `/web`
+- `setup-cellar.sh` — creates the S3 bucket on Cellar (used as a post-build hook)
 
-### Bedrock's structure
+## Technology Stack
+
+- [WordPress](https://wordpress.org/) 6.9 — Content management system
+- [Bedrock](https://roots.io/bedrock/) 1.30 — Modern WordPress boilerplate
+- [Composer](https://getcomposer.org/) — Dependency manager for PHP
+- [Cellar](https://www.clever-cloud.com/product/cellar-s3/) — S3-compatible object storage for media files
+
+## Prerequisites
+
+- PHP 8.3+
+- Composer
+- A Clever Cloud account
+
+## Running the Application Locally
+
+```bash
+# Install dependencies
+composer install
+
+# Copy and edit the environment file
+cp .env.example .env
+
+# Start the local server
+wp server
+```
+
+The application will be accessible at http://localhost:8080.
+
+## Deploying on Clever Cloud
+
+You have two options to deploy your WordPress application on Clever Cloud: using the Web Console or using the Clever Tools CLI.
+
+### Option 1: Deploy using the Web Console
+
+#### 1. Create an account on Clever Cloud
+
+If you don't already have an account, go to the [Clever Cloud console](https://console.clever-cloud.com/) and follow the registration instructions.
+
+#### 2. Set up your application on Clever Cloud
+
+1. Log in to the [Clever Cloud console](https://console.clever-cloud.com/)
+2. Click on "Create" and select "An application"
+3. Select this project (or a fork of it) as the source
+4. Choose "PHP" as the runtime environment
+5. Configure your application settings (name, region, etc.)
+
+#### 3. Add a MySQL Database Add-on
+
+1. In your application settings, go to "Service dependencies"
+2. Add a **MySQL** add-on and link it to your application
+
+The `MYSQL_ADDON_*` environment variables will be automatically injected.
+
+#### 4. Configure Environment Variables
+
+Add the following environment variables in the Clever Cloud console (expert mode):
+
+| Variable | Value | Description |
+|----------|-------|-------------|
+| `WP_ENV` | `production` | WordPress environment |
+| `WP_HOME` | `https://your-domain.tld` | Your site URL |
+| `WP_SITEURL` | `https://your-domain.tld/wp` | WordPress core URL |
+| `AUTH_KEY` | *(generated)* | Authentication salts — generate all 8 keys at https://cdn.roots.io/salts.html |
+| `SECURE_AUTH_KEY` | *(generated)* | |
+| `LOGGED_IN_KEY` | *(generated)* | |
+| `NONCE_KEY` | *(generated)* | |
+| `AUTH_SALT` | *(generated)* | |
+| `SECURE_AUTH_SALT` | *(generated)* | |
+| `LOGGED_IN_SALT` | *(generated)* | |
+| `NONCE_SALT` | *(generated)* | |
+
+#### 5. Set up Cellar S3 Storage (for media files)
+
+1. Create a **Cellar S3 storage** add-on and link it to your application
+2. In the Cellar add-on dashboard, click on **"Create a bucket"** and give it a name
+3. Add the environment variable `CELLAR_ADDON_BUCKET` with the name of your bucket
+4. Restart your application to apply changes
+
+#### 6. Deploy Your Application
+
+You can deploy your application using Git:
+
+```bash
+# Add Clever Cloud as a remote repository
+git remote add clever git+ssh://git@push-par-clevercloud-customers.services.clever-cloud.com/app_<your-app-id>.git
+
+# Push your code to deploy
+git push clever master
+```
+
+#### 7. Finish WordPress Installation
+
+1. Set up your domain name as configured for `WP_HOME` (or use `*.cleverapps.io` for testing)
+2. Access the WordPress installation page at your domain
+3. After installation, go to the plugins page and activate **S3 Uploads**
+
+### Option 2: Deploy using Clever Tools CLI
+
+#### 1. Install Clever Tools
+
+Install the Clever Tools CLI following the [official documentation](https://www.clever-cloud.com/doc/clever-tools/getting_started/):
+
+```bash
+# Using npm
+npm install -g clever-tools
+
+# Or using Homebrew (macOS)
+brew install clever-tools
+```
+
+#### 2. Log in to your Clever Cloud account
+
+```bash
+clever login
+```
+
+#### 3. Create and configure the application
+
+```bash
+# Create a PHP application
+clever create --type php <YOUR_APP_NAME>
+
+# Add a MySQL add-on
+clever addon create mysql-addon <YOUR_ADDON_NAME> --link <YOUR_APP_NAME>
+
+# Add a Cellar S3 add-on
+clever addon create cellar-addon <YOUR_CELLAR_NAME> --link <YOUR_APP_NAME>
+
+# Add your domain (optional)
+clever domain add <YOUR_DOMAIN_NAME>
+
+# Set required environment variables
+clever env set WP_ENV production
+clever env set WP_HOME "https://$(clever domain | tr -d ' ')"
+clever env set WP_SITEURL "https://$(clever domain | tr -d ' ')wp"
+
+
+
+# Please remember S3 bucket names are unique
+# To avoid conflicts, simply use your app id as bucket name
+clever env set CELLAR_ADDON_BUCKET $(clever applications -j | jq -r '.[0].app_id' | tr '_' '-')
+
+# Load env variables
+eval "$(clever env -F shell)"
+
+# Create the Cellar bucket on first deploy
+./setup-cellar.sh
+
+# Set authentication salts (generate at https://cdn.roots.io/salts.html)
+clever env set AUTH_KEY "your-generated-key"
+clever env set SECURE_AUTH_KEY "your-generated-key"
+clever env set LOGGED_IN_KEY "your-generated-key"
+clever env set NONCE_KEY "your-generated-key"
+clever env set AUTH_SALT "your-generated-salt"
+clever env set SECURE_AUTH_SALT "your-generated-salt"
+clever env set LOGGED_IN_SALT "your-generated-salt"
+clever env set NONCE_SALT "your-generated-salt"
 
 ```
-site/
-├── config/
-│   ├── environments/
-│   │   ├── development.php
-│   │   ├── staging.php
-│   │   └── production.php
-│   └── application.php   # Primary wp-config.php
-├── vendor/               # Composer dependencies
-└── web/                  # Virtual host document root
-    ├── app/              # WordPress content directory
-    │   ├── mu-plugins/
-    │   ├── plugins/
-    │   ├── themes/
-    │   └── uploads/
-    └── wp/               # WordPress core
+
+#### 4. Deploy your application
+
+```bash
+clever deploy
 ```
 
-## Status
+#### 5. Open your application in a browser
 
-This repository has been tested and successfully deployed with Clever Cloud. We will keep adding features and updating the project to fit our customers' needs.
+Once deployed, access your site at `https://<YOUR_DOMAIN_NAME>/` and complete the WordPress installation.
 
-## Instructions
+## Sending Emails
 
-Let's build your modern Wordpress.
+By default, this WordPress installation cannot send emails. You can either:
 
-### Requirements
+- Follow [Clever Cloud's SMTP documentation](https://www.clever-cloud.com/doc/php/php-apps/#sending-emails) to configure your SMTP server
+- Activate and configure the **Mailgun** plugin (installed by default)
 
-None. Except a CleverCloud account ;-)
+## Installing Themes and Plugins
 
-### Initial deployment
+Themes and plugins are managed via Composer and [WordPress Packagist](https://wpackagist.org). To install a new plugin or theme, add it to `composer.json` and commit:
 
-It will assume your GitHub account is linked to your CleverCloud account. If not, you'll just have to do the same steps but cloning and pushing the project yourself to CleverCloud.
+```bash
+composer require wpackagist-plugin/plugin-name
+git add composer.json composer.lock
+git commit -m "Add plugin-name"
+git push clever master
+```
 
-1. Fork this magnificent repository
-2. Log in to your CleverCloud console
-3. Create a new application, by selecting this project fork, and obviously as a *PHP* one
-4. Add one *MySQL database* add-on
-5. On next page, edit the environment variables in expert mode and paste one env salts generated [here](https://cdn.roots.io/salts.html). Don't forget to save the changes.
-6. Add 4 more variables : `WP_ENV` with value `production` ; `WP_HOME` with value `https://your-domain.tld` ; `WP_SITEURL` with value `https://your-domain.tld/wp` ; `CC_PHP_VERSION` with value `8`.
-7. While your app start, create a *Cellar S3 storage* add-on, and link it to your application
-8. On the add-on configuration page, create one bucket
-9. Go back in your application configuration and add the environment variable `CELLAR_ADDON_BUCKET` with the name of your bucket
-10. Apply changes by restarting your application
-11. Don't forget to set up your domain name as configured for `WP_HOME` (or one `*.cleverapps.io` for testing purpose)
-12. You'll then have access to the installation page of WordPress
-13. After installed, go to your plugins home page and active `S3 Uploads`
+> **Note:** Pay attention to how you define your [dependencies with Composer](https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies). The stricter way is to locally run `composer update` and commit your `composer.lock` file.
 
-**Important note :** At this time, your WordPress installation is not capable of sending any emails. Follow  [CleverCloud's documentation](https://www.clever-cloud.com/doc/php/php-apps/#sending-emails) to configure your SMTP server, of activate and configure the `Mailgun` plugin installed by default.
+## Keeping WordPress Updated
 
-### Installing themes and plugins
+WordPress updates are handled through Composer. Update the version in `composer.json`, run `composer update`, commit, and deploy. If a database migration is needed, WordPress will prompt you when logged in as administrator.
 
-Your WordPress installation is now fully managed by *composer* and [WordPress Packagist](https://wpackagist.org). So to install themes or plugins, you'll have to add them to the `composer.json` file, and commit. The dependencies will be fetched by *composer* during CleverCloud rebuild of your project.
+## Monitoring Your Application
 
-**Important note :** Pay attention to how you define your [dependencies with composer](https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies), being strict, or having them automatically update if needed when it rebuilds. The stricter way would even be to locally `composer update` your project and commit your own `composer.lock` file.
+Once deployed, you can monitor your application through:
 
-### Keeping WP updated
+- **Web Console**: The Clever Cloud console provides logs, metrics, and other tools to help you manage your application.
+- **CLI**: Use `clever logs` to view application logs and `clever status` to check the status of your application.
 
-As for themes and plugins, keeping WordPress updated must be done by the dependencies way. That means you'll have to change the WordPress version in your `composer.json` file and commit. Once restarted, if you are connected as administrator, a page will propose you to do the database update, if any.
+## Differences with Bedrock
 
-### Differences with Bedrock
+This project is based on [Bedrock 1.30.0](https://github.com/roots/bedrock/releases/tag/1.30.0) with the following changes:
 
-For those who want or need to go deeper regarding Bedrock, here are the small differences between this fork (based on version **1.12.8**) and a standard Bedrock install.
+- `config/application.php` uses Clever Cloud's `MYSQL_ADDON_*` variables for database configuration and `CELLAR_ADDON_*` variables for S3 storage
+- `composer.json` includes `humanmade/s3-uploads` and `wpackagist-plugin/mailgun` as additional dependencies, and the wpackagist.org repository
+- `web/app/mu-plugins/s3-uploads-filter.php` configures the S3 client to use a Cellar endpoint
+- `web/.htaccess` is tracked in the repository (Bedrock gitignores it by default)
+- `clevercloud/php.json` configures the webroot for Clever Cloud's build system
+- `setup-cellar.sh` creates the S3 bucket on Cellar via `s3cmd` (can be used as `CC_POST_BUILD_HOOK`)
 
-- You don't need any `.env` file for your environment variables, it can be useful if you want to run your WordPress locally
-- `config/application.php` has been modified to directly use MySQL and Cellar environment variables shared by CleverCloud
-- Plugin `humanmade/s3-uploads` added by default to use S3 storage for media files
-- `web/app/mu-plugins/s3-uploads-filter.php` have been added to use a Cellar endpoint in place of an AWS one
-- `.htaccess` have been included by default
+## Additional Resources
 
-Enjoy !
+- [Bedrock Documentation](https://roots.io/bedrock/docs/)
+- [WordPress Documentation](https://developer.wordpress.org/)
+- [Composer Documentation](https://getcomposer.org/doc/)
+- [Clever Cloud PHP Documentation](https://www.clever-cloud.com/developers/doc/applications/php/)
+- [Clever Cloud Cellar Documentation](https://www.clever-cloud.com/developers/doc/addons/cellar/)
