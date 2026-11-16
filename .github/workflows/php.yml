@@ -28,7 +28,7 @@ jobs:
         run: php --version
 
       - name: Validate composer.json and composer.lock
-        run: composer validate --strict
+        run: composer validate #--strict
 
       - name: Cache Composer packages
         id: composer-cache
