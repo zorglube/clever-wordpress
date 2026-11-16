@@ -57,7 +57,7 @@
   },
   "require-dev": {
     "squizlabs/php_codesniffer": "^4.0.0",
-    "roave/security-advisories": "dev-master"
+    "roave/security-advisories": "dev-latest"
   },
   "config": {
     "optimize-autoloader": true,
